@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Medecin;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -11,50 +12,51 @@ use Illuminate\Support\Str;
 class MedecinController extends Controller
 {
 
-    public function store(Request $request): \Illuminate\Http\JsonResponse
-    {
-        $validateData= Validator::make($request->all(),
-            [
-                'nom' => 'required|string|max:50',
-                'prenom' => 'required|string|max:50',
-                'email' => 'required|email|unique:doctors,email,',                'date_de_naissance' => 'required',
-                'sexe' => 'required|string|in:masculin,feminin',
-                'numero_telephone' => 'required|max:10',
-                'specilalite' => 'required|max:50',
-                'numero_onmc'=> 'required|max:10',
-                'lieu_de_travail'=> 'required|string|max:100',
-                'ville'=> 'required|string|max:50',
-                'password' => 'required|string|min:8|confirmed',
-                'password_confirmation' => 'required',
-
-            ]);
-
-        if ($validateData->fails()) {
-            return response()->json($validateData->errors());
-        }
-        try {
-            $user_id=(string) Str::uuid();
-            $role='medecin';
-            $status=0;
-            $medecin = Medecin::create(array_merge($request->all(), ['id_user' => $user_id],['role'=>$role],['status_compte'=>$status]));
-
-            return response()->json([
-                'medecin' => $medecin,
-                'message' => 'Médecin enregistré avec succès',
-                'status'=>  200
-            ]);
-        }catch (\Exception $exception){
-            return response()->json(['error'=>$exception->getMessage()]);
-        }
-
-    }
+//    public function store(Request $request): \Illuminate\Http\JsonResponse
+//    {
+//        $validateData= Validator::make($request->all(),
+//            [
+//                'nom' => 'required|string|max:50',
+//                'prenom' => 'required|string|max:50',
+//                'email' => 'required|email|unique:doctors,email,',
+//                'date_de_naissance' => 'required',
+//                'sexe' => 'required|string|in:masculin,feminin',
+//                'numero_telephone' => 'required|max:10',
+//                'specilalite' => 'required|max:50',
+//                'numero_onmc'=> 'required|max:10',
+//                'lieu_de_travail'=> 'required|string|max:100',
+//                'ville'=> 'required|string|max:50',
+//                'password' => 'required|string|min:8|confirmed',
+//                'password_confirmation' => 'required',
+//
+//            ]);
+//
+//        if ($validateData->fails()) {
+//            return response()->json($validateData->errors());
+//        }
+//        try {
+//            $user_id=(string) Str::uuid();
+//            $role='medecin';
+//            $status=0;
+//            $medecin = User::create(array_merge($request->all(), ['id_user' => $user_id],['role'=>$role],['status_compte'=>$status]));
+//
+//            return response()->json([
+//                'medecin' => $medecin,
+//                'message' => 'Médecin enregistré avec succès',
+//                'status'=>  200
+//            ]);
+//        }catch (\Exception $exception){
+//            return response()->json(['error'=>$exception->getMessage()]);
+//        }
+//
+//    }
 
     /**
      * Display a listing of the resource.
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $medecins = Medecin::all();
+        $medecins = User::where('role','medecin')->get();
         return response()->json($medecins,201);
     }
 
@@ -64,7 +66,7 @@ class MedecinController extends Controller
      */
     public function show(string $id): \Illuminate\Http\JsonResponse
     {
-        $medecin=Medecin::findorFail($id);
+        $medecin=User::findorFail($id);
         return response()->json($medecin,202);
     }
 
@@ -73,7 +75,7 @@ class MedecinController extends Controller
      */
     public function update(Request $request, string $id): \Illuminate\Http\JsonResponse
     {
-        $medecin=Medecin::findorFail($id);
+        $medecin=User::findorFail($id);
 
         $validateData= Validator::make($request->all(),
             [
@@ -113,7 +115,7 @@ class MedecinController extends Controller
      */
     public function destroy(string $id): \Illuminate\Http\JsonResponse
     {
-        $medecin=Medecin::findorFail($id);
+        $medecin=User::findorFail($id);
         $medecin->delete();
         return response()->json
         ([

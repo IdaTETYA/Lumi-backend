@@ -36,12 +36,12 @@ class User extends Authenticatable
         'password',
         'role',
         'specialite',
-        'numeroONMC',
+        'numero_onmc',
         'lieu_de_travail',
         'latitude_lieu_de_travail',
         'longitude_lieu_de_travail',
         'remember_token',
-        'stade_de_grossesse',
+        'as_antecedent_familiaux' ,
         'statut_compte',
         'est_connecte',
         'device_token',
@@ -55,11 +55,6 @@ class User extends Authenticatable
         'created_at',
         'updated_at',
         'motif_refus'
-
-
-
-
-
     ];
 
     /**

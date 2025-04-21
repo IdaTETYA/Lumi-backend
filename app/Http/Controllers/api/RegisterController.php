@@ -11,48 +11,46 @@ use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
-    /**
-     * Register a new user and return an API token.
-     */
-    public function register(Request $request): \Illuminate\Http\JsonResponse
+    public function registerPatient(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|unique:user,email|max:255',
             'password' => 'required|string|min:8',
-            'confirm_password' => 'nullable|string|required_with:password|same:password',
             'nom' => 'required|string|max:20',
             'prenom' => 'required|string|max:20',
-            'numero_telephone' => 'required|string|max:9',
-            'sexe' => 'required|in:masculin,feminin',
+            'numero_telephone' => 'required|string',
+            'sexe' => 'required',
             'date_de_naissance' => 'required|date',
             'ville' => 'required|string|max:255',
-            'pays' => 'required|string|max:255',
             'quartier' => 'required|string|max:255',
-            'stade_de_grossesse' => 'required|integer|max:2',
+            'as_antecedent_familiaux' => 'required|boolean',
+            'accepte_conditions'=>'required|boolean',
+
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()->all(),
-            ], 400);
+                'errors' => $validator->errors()->toArray(),
+            ], 422);
         }
 
         try {
             $user = User::create([
-                'id_user'=>(string) Str::uuid(),
+                'id_user' => (string) Str::uuid(),
                 'nom' => $request->nom,
                 'prenom' => $request->prenom,
-                'numero_telephone' => $request->telephone,
+                'numero_telephone' => $request->numero_telephone,
                 'sexe' => $request->sexe,
                 'date_de_naissance' => $request->date_de_naissance,
                 'ville' => $request->ville,
-                'pays' => $request->pays,
                 'quartier' => $request->quartier,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'stade_de_grossese'=>$request->stade_de_grossesse,
                 'role' => 'patient',
+                'status_compte' => 1,
+                'accepte_conditions'=>$request->accepte_conditions,
+
             ]);
 
             $token = $user->createToken('auth_token')->plainTextToken;
@@ -68,5 +66,84 @@ class RegisterController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function registerMedecin(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'nom' => 'required|string|max:50',
+            'prenom' => 'required|string|max:50',
+            'email' => 'required|email|unique:user,email',
+            'date_de_naissance' => 'required|date',
+            'sexe' => 'required|string',
+            'numero_telephone' => 'required|string|max:10',
+            'specialite' => 'required|string|max:50',
+            'numero_onmc' => 'required|string|max:10',
+            'lieu_de_travail' => 'required|string|max:100',
+            'ville' => 'required|string|max:50',
+            'password' => 'required|string|min:8',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()->toArray(),
+            ], 422);
+        }
+
+        try {
+            $user = User::create([
+                'id_user' => (string) Str::uuid(),
+                'nom' => $request->nom,
+                'prenom' => $request->prenom,
+                'email' => $request->email,
+                'date_de_naissance' => $request->date_de_naissance,
+                'sexe' => $request->sexe,
+                'numero_telephone' => $request->numero_telephone,
+                'specialite' => $request->specialite,
+                'numero_onmc' => $request->numero_onmc,
+                'lieu_de_travail' => $request->lieu_de_travail,
+                'ville' => $request->ville,
+                'password' => Hash::make($request->password),
+                'role' => 'medecin',
+                'status_compte' => 0,
+                'accepte_conditions'=>$request->accepte_conditions,
+
+            ]);
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'medecin' => $user,
+                'message' => 'Médecin enregistré avec succès',
+                'token' => $token,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de l\'enregistrement du médecin',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function verifierEmail(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()->toArray(),
+            ], 422);
+        }
+
+        $emailExist = User::where('email', $request->email)->exists();
+
+        return response()->json([
+            'exists' => $emailExist,
+            'message' => $emailExist ? 'Email existant' : 'Email disponible',
+        ], 200);
     }
 }

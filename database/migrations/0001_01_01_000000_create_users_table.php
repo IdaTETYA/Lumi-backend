@@ -31,7 +31,7 @@ return new class extends Migration
                 $table->double('longitude_lieu_de_travail')->nullable();
                 $table->string('motif_refus')->nullable();
 
-                $table->integer('stade_de_grossesse')->nullable();
+                $table->boolean('as_antecedent_familiaux')->nullable();
 
                 $table->boolean('est_connecte')->default(false);
                 $table->string('device_token')->nullable();
