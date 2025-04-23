@@ -15,10 +15,10 @@ return new class extends Migration
             $table->uuid('id_document')->primary(); // UUID, stocké comme string
             $table->string('titre'); // Titre du document
             $table->string('type');
-            $table->string('chemin'); // Chemin ou URL du fichier
+            $table->string('file'); // Chemin ou URL du fichier
             $table->uuid('medecin_id'); // UUID, référence à medecins (médecin qui a fourni le document)
             $table->uuid('valide_par_id')->nullable(); // UUID, référence à administrateurs (administrateur qui a validé)
-            $table->string('statut'); // Ex. "en_attente", "valide", "rejete"
+            $table->boolean('statut');
             $table->foreign('medecin_id')->references('id_user')->on('user')->onDelete('cascade');
             $table->foreign('valide_par_id')->references('id_user')->on('user')->onDelete('set null');
             $table->index('medecin_id'); // Index pour les requêtes fréquentes

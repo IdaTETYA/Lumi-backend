@@ -16,7 +16,7 @@ class Document extends Model
             'id_document',
             'type',
             'titre',
-            'chemin',
+            'file',
             'medecin_id',
             'valide_par_id',
             'statut',
@@ -26,6 +26,11 @@ class Document extends Model
     public function medecin()
     {
         return $this->belongsTo(Medecin::class, 'medecin_id');
+    }
+
+    public function validePar()
+    {
+        return $this->belongsTo(User::class, 'valide_par_id'); // Relation avec l'admin qui valide
     }
 
 }
