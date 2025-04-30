@@ -16,7 +16,7 @@ return new class extends Migration
                 $table->string('nom');
                 $table->string('prenom');
                 $table->date('date_de_naissance')->nullable();
-                $table->string('sexe')->nullable();
+                $table->enum('sexe',['feminin', 'masculin'])->nullable();
                 $table->string('ville')->nullable();
                 $table->string('quartier')->nullable();
                 $table->string('numero_telephone')->nullable();
@@ -29,7 +29,7 @@ return new class extends Migration
                 $table->string('lieu_de_travail')->nullable();
                 $table->double('latitude_lieu_de_travail')->nullable();
                 $table->double('longitude_lieu_de_travail')->nullable();
-                $table->string('motif_refus')->nullable();
+                $table->text('motif_refus')->nullable();
 
                 $table->boolean('as_antecedent_familiaux')->nullable();
 
@@ -43,9 +43,9 @@ return new class extends Migration
                 $table->boolean('accepte_conditions')->default(false);
                 $table->dateTime('derniere_activite')->nullable();
                 $table->integer('nombre_connexions')->default(0);
-                $table->boolean('statut_compte')->nullable();
+                $table->tinyInteger('statut_compte')->nullable();
                 $table->string('photo')->nullable();
-                $table->string('motif_banis')->nullable();
+                $table->text('motif_banis')->nullable();
                 $table->timestamps();
         });
 

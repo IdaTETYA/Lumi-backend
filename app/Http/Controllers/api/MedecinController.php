@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\IdRequest;
+use App\Models\Document;
 use App\Models\Medecin;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -67,13 +70,16 @@ class MedecinController extends Controller
     public function show(string $id): \Illuminate\Http\JsonResponse
     {
         $medecin=User::findorFail($id);
-        return response()->json($medecin,202);
+        return response()->json([
+            'medecin' => $medecin,
+            'status'=>'success'
+        ],202);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id): \Illuminate\Http\JsonResponse
+    public function update(Request $request, string $id): JsonResponse
     {
         $medecin=User::findorFail($id);
 
@@ -113,7 +119,7 @@ class MedecinController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): \Illuminate\Http\JsonResponse
+    public function destroy(string $id): JsonResponse
     {
         $medecin=User::findorFail($id);
         $medecin->delete();
@@ -125,4 +131,26 @@ class MedecinController extends Controller
 
         ],204);
     }
+
+    //liste des documents d'un medecin
+    public function showDocument(string $id): JsonResponse
+    {
+        try {
+            $documents = Document::where('medecin_id', $id)->get();
+
+            $total = $documents->count();
+            $verified = $documents->where('statut', 1)->count();
+
+            return response()->json([
+                'documents' => $documents,
+                'total' => $total,
+                'verified' => $verified,
+                'status' => 'success'
+            ], 200);
+        } catch (\Exception $exception) {
+            return response()->json(['error' => $exception->getMessage()], 500);
+        }
+    }
+
+
 }

@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\DocumentRequest;
+use App\Http\Requests\statusRequest;
+use App\Http\Requests\validerDocumentRequest;
 use App\Models\Document;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -16,7 +20,7 @@ class DocumentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): \Illuminate\Http\JsonResponse
+    public function index(): JsonResponse
     {
         $documents = Document::all();
         return response()->json([
@@ -29,21 +33,9 @@ class DocumentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): \Illuminate\Http\JsonResponse
+    public function store(DocumentRequest $request): JsonResponse
     {
-        $validatedData = Validator:: make($request->all(),[
-            'type'=>'required|string',
-            'titre'=>'required|string',
-            'file'=>'required|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'medecin_id' => 'nullable|exists:user,id_user',
-        ]);
 
-        if ($validatedData->fails()) {
-            return response()->json([
-                $validatedData->errors(),
-                'message'=>'erreur de validation'
-            ]);
-        }
 
         try {
 
@@ -152,7 +144,7 @@ class DocumentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): \Illuminate\Http\JsonResponse
+    public function destroy(string $id): JsonResponse
     {
         try {
             $user = Auth::user();
@@ -188,6 +180,50 @@ class DocumentController extends Controller
                 'status' => 'error',
                 'error' => $e->getMessage(),
                 'message' => 'Document not deleted'
+            ], 500);
+        }
+    }
+
+
+    /**
+     * Validate the specified document.
+     */
+    public function validerDocument(validerDocumentRequest $request, string $id):JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Authentication required'
+                ], 401);
+            }
+
+            if ($user->role !== 'admin') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Only administrators can validate a document'
+                ], 403);
+            }
+
+            $document = Document::findOrFail($id);
+
+            $document->update([
+                'statut' => $request->statut,
+                'valide_par_id' => $request->id_user,
+                'motif_refus' => $request->motif? : null,
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $document,
+                'message' => 'Document validate successfully'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'error' => $e->getMessage(),
+                'message' => 'Document not validated'
             ], 500);
         }
     }

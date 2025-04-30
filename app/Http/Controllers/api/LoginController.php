@@ -2,32 +2,23 @@
 
 namespace App\Http\Controllers\api;
 
+use App\Events\UserLoggedIn;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\LoginRequest;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    public function login(Request $request):\Illuminate\Http\JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
-        $validateData = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string|min:8',
-        ]);
-
-
-        if ($validateData->fails()) {
-            return response()->json($validateData->errors()->getMessages(), 400);
-        }
-
-        try
-        {
+        try {
             $logInfo = $request->only('email', 'password');
 
             if (auth()->attempt($logInfo)) {
                 $utilisateur = Auth::user();
-
+                event(new UserLoggedIn($utilisateur));
                 $token = $utilisateur->createToken('auth_token')->plainTextToken;
 
                 return response()->json([
@@ -38,18 +29,21 @@ class LoginController extends Controller
 
             }
 
-        }catch(\Exception $e)
-        {
+            return response()->json([
+                'message' => 'Invalid credentials',
+                'status' => 401,
+            ]);
+
+        } catch (Exception $e) {
             return response()->json([
                 'message' => 'Login failed',
                 'error' => $e->getMessage(),
                 'status' => 500,
             ]);
         }
-
     }
 
-    public function logout(): \Illuminate\Http\JsonResponse
+    public function logout(): JsonResponse
     {
         auth()->user()->tokens()->delete();
         return response()->json([

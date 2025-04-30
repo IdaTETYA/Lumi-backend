@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('file'); // Chemin ou URL du fichier
             $table->uuid('medecin_id'); // UUID, référence à medecins (médecin qui a fourni le document)
             $table->uuid('valide_par_id')->nullable(); // UUID, référence à administrateurs (administrateur qui a validé)
-            $table->boolean('statut');
+            $table->tinyInteger('statut')->default(0);
+            $table->Text('motif_refus')->nullable();
             $table->foreign('medecin_id')->references('id_user')->on('user')->onDelete('cascade');
             $table->foreign('valide_par_id')->references('id_user')->on('user')->onDelete('set null');
             $table->index('medecin_id'); // Index pour les requêtes fréquentes
