@@ -126,7 +126,7 @@ class RegisterController extends Controller
         }
     }
 
-    public function verifierEmail(Request $request)
+    public function verifierEmail(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',

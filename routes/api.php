@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\api\AdministrateurController;
+use App\Http\Controllers\api\ChatAIController;
 use App\Http\Controllers\api\DocumentController;
 use App\Http\Controllers\api\MedecinController;
 use App\Http\Middleware\AdminMiddleware;
@@ -44,9 +45,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('documents/{id}/valider', [DocumentController::class, 'validerDocument']);
 
 
-
     });
 
+    Route::post('/chat', [ChatAIController::class, 'chat']);
+    Route::get('/chat/{chatAiId}/messages', [ChatAIController::class, 'getMessages']);
+    Route::get('/conversations', [ChatAIController::class, 'getConversations']);
 
 });
 

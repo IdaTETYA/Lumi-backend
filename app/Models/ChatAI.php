@@ -14,9 +14,25 @@ class ChatAI extends Model
 
     protected $fillable = [
         'id_chat_ai',
+        'title',
         'patient_id',
-        'diagnostic',
+        'symptoms',
         'conseil',
         'analyse',
     ];
+
+    protected $casts = [
+        'symptoms' => 'array',
+    ];
+
+    public function patient(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'patient_id', 'id_user');
+    }
+
+    public function messages(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Message::class, 'chat_ai_id', 'id_chat_ai');
+    }
+
 }
