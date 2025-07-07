@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('message', function (Blueprint $table) {
             $table->uuid('id_message')->primary();
             $table->uuid('chat_ai_id')->nullable();
-            $table->string('content');
+            $table->Text('content');
             $table->string('statut');
             $table->string('user_id');
             $table->string('chat_id');

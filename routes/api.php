@@ -47,9 +47,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     });
 
+});
+
+Route::middleware('auth:sanctum')->group(function () {
     Route::post('/chat', [ChatAIController::class, 'chat']);
     Route::get('/chat/{chatAiId}/messages', [ChatAIController::class, 'getMessages']);
     Route::get('/conversations', [ChatAIController::class, 'getConversations']);
-
 });
+
 

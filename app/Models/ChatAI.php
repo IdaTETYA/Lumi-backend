@@ -11,6 +11,9 @@ class ChatAI extends Model
 
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $primaryKey = 'id_chat_ai';
+    public $timestamps = true;
+    protected $table = 'chat_ai';
 
     protected $fillable = [
         'id_chat_ai',
@@ -35,4 +38,17 @@ class ChatAI extends Model
         return $this->hasMany(Message::class, 'chat_ai_id', 'id_chat_ai');
     }
 
+    public function consultation(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Consultation::class, 'consultation_id', 'id_consultation');
+    }
+
+
+    public function transmissions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TransmissionMedecin::class, 'chat_ai_id', 'id_chat_ai');
+    }
+
 }
+
+

@@ -10,17 +10,22 @@ class Message extends Model
 {
     use HasFactory, Notifiable;
 
+    protected $primaryKey = 'id_message';
+    public $incrementing = false;
+    protected $keyType = 'string';
+    public $timestamps = true;
+    protected $table = 'message';
+
 
     protected  $fillable =
-        [
-            'id_message',
+        [   'id_message',
+            'chat_ai_id',
             'parent_message_id',
             'content',
-            'statut',
+            'role',
             'created_at',
             'updated_at',
             'deleted_at',
-            'chat_id',
             'user_id'
         ];
 
@@ -30,9 +35,14 @@ class Message extends Model
         return $this->belongsTo(Chat::class, 'chat_id');
     }
 
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function chatAi()
     {
-        return $this->belongsTo(User::class, 'user_id');
-
+        return $this->belongsTo(ChatAI::class, 'chat_ai_id', 'id_chat_ai');
     }
-}
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id_user');
+    }
+
+ }

@@ -9,7 +9,7 @@ class ChatMessageRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->check();
+        return true;
     }
 
     public function rules(): array
@@ -17,7 +17,7 @@ class ChatMessageRequest extends FormRequest
         return [
             'message' => 'required|string|max:1000',
             'chat_ai_id' => 'nullable|uuid|exists:chat_ai,id_chat_ai',
-            'title' => 'required_if:chat_ai_id,null|string|max:255',
+            'title' => 'nullable|string|max:255',
         ];
     }
 
@@ -29,7 +29,6 @@ class ChatMessageRequest extends FormRequest
             'message.max' => 'Le message ne peut pas dépasser 1000 caractères.',
             'chat_ai_id.uuid' => 'L\'ID de la conversation doit être un UUID valide.',
             'chat_ai_id.exists' => 'La conversation spécifiée n\'existe pas.',
-            'title.required_if' => 'Le titre est requis pour une nouvelle conversation.',
             'title.string' => 'Le titre doit être une chaîne de caractères.',
             'title.max' => 'Le titre ne peut pas dépasser 255 caractères.',
         ];
