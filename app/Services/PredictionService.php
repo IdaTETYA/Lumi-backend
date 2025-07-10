@@ -47,6 +47,7 @@ class PredictionService
         $returnVar = 0;
         exec($command, $output, $returnVar);
 
+
         $outputStr = implode('', $output);
         Log::debug('Sortie brute Python', ['output' => $outputStr]);
 

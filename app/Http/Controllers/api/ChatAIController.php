@@ -131,11 +131,8 @@ class ChatAIController extends Controller
 
         Réponds UNIQUEMENT avec un JSON brut, sans balises markdown.';
 
-    private PredictionService $predictionService;
-
-    public function __construct(PredictionService $predictionService)
+    public function __construct(private  PredictionService $predictionService)
     {
-        $this->predictionService = $predictionService;
     }
 
     private function cleanGeminiResponse(string $response): string
@@ -165,8 +162,8 @@ class ChatAIController extends Controller
                 return response()->json(['error' => 'Utilisateur non authentifié'], 401);
             }
 
-            $message = $request->validated()['message'];
-            $chat_ai_id = $request->validated()['chat_ai_id'];
+            $message = $request->validated('message');
+            $chat_ai_id = $request->validated('chat_ai_id');
 
             // Récupérer ou créer une session ChatAI
             if ($chat_ai_id) {

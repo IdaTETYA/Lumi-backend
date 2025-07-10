@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -20,13 +21,29 @@ class DocumentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $documents = Document::all();
-        return response()->json([
-            'status' => 'success',
-            'data' => $documents
-        ], 200);
+        try {
+            $perPage = $request->input('per_page', 10); // Nombre d'éléments par page, par défaut 10
+            $documents = Document::with('medecin:id_user,nom,prenom,specialite,email,numero_telephone,sexe')
+                ->paginate($perPage);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $documents->items(),
+                'pagination' => [
+                    'current_page' => $documents->currentPage(),
+                    'per_page' => $documents->perPage(),
+                    'total' => $documents->total(),
+                    'last_page' => $documents->lastPage(),
+                ]
+            ], 200);
+        } catch (\Exception $exception) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $exception->getMessage()
+            ]);
+        }
     }
 
 
@@ -211,7 +228,7 @@ class DocumentController extends Controller
             $document->update([
                 'statut' => $request->statut,
                 'valide_par_id' => $request->id_user,
-                'motif_refus' => $request->motif? : null,
+                'motif_refus' => $request->motif_refus? : null,
             ]);
 
             return response()->json([

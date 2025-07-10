@@ -24,7 +24,7 @@ class validerDocumentRequest extends FormRequest
         return [
             'statut'=>'required|in:0,1,-1',
             'valide_par_id'=>'required|string',
-            'motif'=>'string'
+            'motif_refus'=>'string'
         ];
     }
 }
