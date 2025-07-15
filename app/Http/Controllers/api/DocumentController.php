@@ -225,9 +225,11 @@ class DocumentController extends Controller
 
             $document = Document::findOrFail($id);
 
+            Log::info("========================== valider par:========".$request->valide_par_id);
+
             $document->update([
                 'statut' => $request->statut,
-                'valide_par_id' => $request->id_user,
+                'valide_par_id' => $request->valide_par_id,
                 'motif_refus' => $request->motif_refus? : null,
             ]);
 

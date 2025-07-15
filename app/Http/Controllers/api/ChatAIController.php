@@ -8,6 +8,8 @@ use App\Models\ChatAI;
 use App\Models\Message;
 use App\Services\PredictionService;
 use Carbon\Carbon;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -131,14 +133,14 @@ class ChatAIController extends Controller
 
         Réponds UNIQUEMENT avec un JSON brut, sans balises markdown.';
 
-    public function __construct(private  PredictionService $predictionService)
+    public function __construct(private PredictionService $predictionService)
     {
     }
 
     private function cleanGeminiResponse(string $response): string
     {
         $cleaned = preg_replace('/^```json\n([\s\S]*)\n```$/', '$1', trim($response));
-        $cleaned = preg_replace('/^[^{]*(\{.*\})[^}]*$/', '$1', $cleaned);
+        $cleaned = preg_replace('/^[^{]*(\{.*})[^}]*$/', '$1', $cleaned);
         return trim($cleaned);
     }
 
@@ -151,7 +153,7 @@ class ChatAIController extends Controller
             'user_id' => $request->user()?->id_user
         ]);
 
-            $transmissionId = null;
+        $transmissionId = null;
 
         try {
             Log::info('Début de chat', ['user_id' => $request->user()?->id_user, 'input' => $request->validated()]);
@@ -272,7 +274,7 @@ class ChatAIController extends Controller
 
                         // Ajouter un message final
                         $bot_data['message'] = 'Merci, vos symptômes ont été transmis au médecin pour évaluation.';
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         Log::error('Erreur lors de la prédiction: ' . $e->getMessage());
                         $bot_data['message'] = 'Erreur lors de la transmission au médecin. Veuillez réessayer.';
                     }
@@ -357,13 +359,13 @@ class ChatAIController extends Controller
                     'transmission_id' => $transmissionId,
                 ], 201);
             });
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Erreur dans chat: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json(['error' => 'Erreur serveur: ' . $e->getMessage()], 500);
         }
     }
 
-    public function getMessages($chatAiId): \Illuminate\Http\JsonResponse
+    public function getMessages($chatAiId): JsonResponse
     {
         try {
             Log::info('Début de getMessages', ['chat_ai_id' => $chatAiId]);
@@ -375,13 +377,13 @@ class ChatAIController extends Controller
             Log::info('Messages récupérés', ['count' => $messages->count()]);
 
             return response()->json($messages);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Erreur dans getMessages: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json(['error' => 'Erreur serveur: ' . $e->getMessage()], 500);
         }
     }
 
-    public function getConversations(Request $request): \Illuminate\Http\JsonResponse
+    public function getConversations(Request $request): JsonResponse
     {
         try {
             Log::info('Début de getConversations', ['user_id' => $request->user()?->id_user]);
@@ -402,7 +404,7 @@ class ChatAIController extends Controller
             Log::info('Conversations récupérées', ['count' => $conversations->count()]);
 
             return response()->json($conversations);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Erreur dans getConversations: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json(['error' => 'Erreur serveur: ' . $e->getMessage()], 500);
         }
