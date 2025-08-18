@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\api\AdministrateurController;
 use App\Http\Controllers\api\ChatAIController;
+use App\Http\Controllers\api\ConsultationController;
 use App\Http\Controllers\api\DocumentController;
 use App\Http\Controllers\api\MedecinController;
+use App\Http\Controllers\api\TypeConsultationController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\LoginController;
@@ -18,6 +20,30 @@ Route::post('/register/verifierEmail', [RegisterController::class, 'verifierEmai
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout']);
+
+    Route::prefix('consultations')->group(function () {
+        Route::post('/', [ConsultationController::class, 'store']);
+        Route::get('/patient/{patientId}', [ConsultationController::class, 'getConsultationsPatient']);
+        Route::get('/patient/{patientId}/recentes', [ConsultationController::class, 'getConsultationsRecentes']);
+        Route::get('/{id}', [ConsultationController::class, 'show']);
+        Route::put('/{id}', [ConsultationController::class, 'update']);
+        Route::patch('/{id}/terminer', [ConsultationController::class, 'terminer']);
+        Route::delete('/{id}', [ConsultationController::class, 'destroy']);
+    });
+
+    // Routes types de consultation
+    Route::get('/types-consultation', [TypeConsultationController::class, 'index']);
+
+    // CORRECTION 1: Routes médecins publiques (pour l'affichage dans l'app)
+    // Ces routes doivent correspondre exactement à ce qui est appelé dans le Flutter
+    Route::get('/medecin', [MedecinController::class, 'indexMedecin']); // Route principale
+    Route::get('/medecins/search', [MedecinController::class, 'search']); // Recherche
+    Route::get('/medecins/recommandes', [MedecinController::class, 'getRecommandes']); // Recommandés
+    Route::get('/medecins/{id}', [MedecinController::class, 'showMedecin']); // Détail d'un médecin
+    Route::get('/medecins/{id}/creneaux', [MedecinController::class, 'getCreneauxDisponibles']); // Créneaux
+
+    // CORRECTION 2: Route alternative pour compatibilité
+    Route::get('/medecins', [MedecinController::class, 'indexMedecin']); // Route alternative
 
 
     Route::middleware(AdminMiddleware::class)->group(function () {
@@ -55,4 +81,35 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/conversations', [ChatAIController::class, 'getConversations']);
 });
 
+Route::get('/chat/test/{chat_ai}', [ChatAIController::class, 'getHistoryMessage']);
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/debug/medecins', function() {
+        $medecins = \App\Models\User::where('role', 'medecin')->get();
+        return response()->json([
+            'count' => $medecins->count(),
+            'medecins' => $medecins,
+            'first_medecin' => $medecins->first(),
+        ]);
+    });
+
+    Route::get('/debug/database', function() {
+        try {
+            $tables = \Illuminate\Support\Facades\DB::select('SHOW TABLES');
+            $userCount = \App\Models\User::count();
+            $medecinCount = \App\Models\User::where('role', 'medecin')->count();
+
+            return response()->json([
+                'database_connected' => true,
+                'tables' => $tables,
+                'total_users' => $userCount,
+                'total_medecins' => $medecinCount,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'database_connected' => false,
+                'error' => $e->getMessage()
+            ]);
+        }
+    });
+});

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -85,10 +86,12 @@ class RegisterController extends Controller
         ]);
 
         if ($validator->fails()) {
+            Log::error($validator->errors()->toArray());
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => $validator->errors()->toArray(),
             ], 422);
+
         }
 
         try {
@@ -119,6 +122,7 @@ class RegisterController extends Controller
                 'token' => $token,
             ], 201);
         } catch (\Exception $e) {
+            Log::error($e->getMessage());
             return response()->json([
                 'message' => 'Erreur lors de l\'enregistrement du médecin',
                 'error' => $e->getMessage(),

@@ -368,17 +368,14 @@ class ChatAIController extends Controller
     public function getMessages($chatAiId): JsonResponse
     {
         try {
-            Log::info('Début de getMessages', ['chat_ai_id' => $chatAiId]);
-
             $messages = Message::where('chat_ai_id', $chatAiId)
-                ->orderBy('created_at')
+                ->whereNotNull('content')
+                ->where('content', '!=', '')
+                ->orderBy('created_at', 'ASC')
                 ->get(['id_message', 'parent_message_id', 'content', 'role', 'created_at']);
-
-            Log::info('Messages récupérés', ['count' => $messages->count()]);
 
             return response()->json($messages);
         } catch (Exception $e) {
-            Log::error('Erreur dans getMessages: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json(['error' => 'Erreur serveur: ' . $e->getMessage()], 500);
         }
     }
